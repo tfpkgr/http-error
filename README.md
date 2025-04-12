@@ -1,97 +1,90 @@
-# @tfpkgr/package-name
+# @tfpkgr/http-error
 
-A standardized TypeScript-based npm package template with automatic bundling using **tsup**.
+## Overview
 
-## Features
+`@tfpkgr/http-error` is a utility package for creating and managing HTTP errors in server-side applications. It provides a structured and consistent way to handle errors with detailed information, including status codes, error types, severity levels, and more.
 
--   **TypeScript support**: Ensures type safety and maintainability.
--   **Automatic bundling**: Uses `tsup` to bundle TypeScript into CommonJS (CJS) and ECMAScript Module (ESM) formats.
--   **Google TypeScript Style**: Enforces code consistency with `gts`.
--   **GitHub Packages Registry**: Pre-configured for publishing to GitHub Packages.
--   **Linting & Formatting**: Includes `gts` for linting and auto-fixing code style issues.
--   **GitHub Actions**: Automated publishing workflow on release.
+## Installation
 
-## Getting Started
-
-### 1. Clone the Repository
-
-```sh
-npx degit tfpkgr/template-npm my-new-package
-cd my-new-package
+```bash
+npm install @tfpkgr/http-error
 ```
 
-### 2. Rename the Package
+## Usage
 
-Before installing dependencies, update the `name` field in `package.json` to your package name. This ensures `package-lock.json` is correctly updated when you install dependencies.
+### Importing the Package
 
-### 3. Install Dependencies
-
-```sh
-npm install
+```typescript
+import HttpError from '@tfpkgr/http-error';
 ```
 
-### 4. Customize Package
+### Throwing an HTTP Error
 
--   Update `package.json` with the appropriate `description` and `author`.
--   Modify `src/index.ts` to implement your package functionality.
+You can throw an HTTP error using the `HttpError` class and its presets:
 
-### 5. Build the Package
+```typescript
+import HttpError from '@tfpkgr/http-error';
 
-```sh
-npm run build
+throw new HttpError(HttpError.PRESETS.NOT_FOUND);
 ```
 
-This will generate the `dist/` directory containing the compiled files.
+### Using Presets with Additional Details
 
-### 6. Lint & Fix Code
+You can add additional details to an error:
 
-```sh
-npm run lint  # Check for issues
-npm run fix   # Auto-fix issues
+```typescript
+import HttpError from '@tfpkgr/http-error';
+
+const error = new HttpError(HttpError.PRESETS.BAD_REQUEST, {
+	details: [
+		{param: 'username', message: 'Username is required'},
+		{param: 'password', message: 'Password must be at least 8 characters'},
+	],
+});
+
+console.log(error.toJSON());
 ```
 
-### 7. Publish to GitHub Packages
+### Static Methods
 
-#### Automatic Publishing on Release
+#### `HttpError.fromPreset`
 
-This repository includes a GitHub Actions workflow (`.github/workflows/publish.yaml`) that automatically publishes the package when a release is created.
+Creates an `HttpError` instance from a predefined preset.
 
-#### Manual Publishing
-
-1. Authenticate with GitHub:
-    ```sh
-    npm login --registry=https://npm.pkg.github.com
-    ```
-2. Publish the package:
-    ```sh
-    npm publish
-    ```
-
-## File Structure
-
-```
-my-new-package/
-├── src/              # Source TypeScript files
-│   ├── index.ts      # Main entry point
-├── dist/             # Compiled output (ignored in Git)
-├── .github/workflows/ # GitHub Actions workflow for publishing
-│   ├── publish.yaml  # Publish package on release
-├── tsconfig.json     # TypeScript configuration
-├── tsconfig.build.json # Build-specific TypeScript config
-├── tsup.config.ts    # tsup bundler config
-├── package.json      # Project metadata & dependencies
-├── README.md         # Project documentation
-├── LICENSE           # License file
+```typescript
+const error = HttpError.fromPreset('INTERNAL_SERVER_ERROR', {
+	message: 'Custom error message',
+});
+throw error;
 ```
 
-## [Multiple Exports](docs/multiple-exports.md)
+#### `HttpError.fromError`
 
-If your package has multiple exports, refer to [this guide](docs/multiple-exports.md) for configuration details.
+Creates an `HttpError` instance from custom error details.
+
+```typescript
+const error = HttpError.fromError(
+	'CUSTOM_TYPE',
+	'CUSTOM_CODE',
+	HttpError.STATUS.BAD_REQUEST,
+	{message: 'Custom error message'},
+);
+throw error;
+```
+
+### Static Utilities
+
+-   `HttpError.PRESETS`: Access predefined error presets.
+-   `HttpError.STATUS`: Access HTTP status codes.
+-   `HttpError.STATUS_MESSAGES`: Access HTTP status messages.
+
+Example:
+
+```typescript
+console.log(HttpError.STATUS.NOT_FOUND); // 404
+console.log(HttpError.STATUS_MESSAGES[HttpError.STATUS.NOT_FOUND]); // "The requested resource could not be found."
+```
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-🚀 Built with ❤️ by MyDeck
+This package is licensed under the MIT License.
